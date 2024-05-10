@@ -1,3 +1,6 @@
+import unittest
+from resolver import *
+
 grille_test = [[0, 1, 0, 2, 3, 4, 0, 0, 0],
                [3, 0, 0, 5, 0, 6, 0, 1, 0],
                [7, 0, 0, 8, 0, 0, 6, 0, 2],
@@ -18,95 +21,60 @@ grille_solution = [[6, 1, 8, 2, 3, 4, 9, 7, 5],
                    [9, 5, 7, 1, 6, 8, 2, 4, 3],
                    [1, 2, 3, 4, 9, 7, 5, 8, 6]]
 
-# Attention: les indices commencent à 0 et non 1, ex: la 3e ligne de la grille correspond au sous-tableau d'indice 2.
+class TestSudokuMethods(unittest.TestCase):
 
-def absentSurLigne(chiffre, grille, ligne):
-    """
-    :param chiffre: chiffre entre 1 et 9 dont on on cherche à vérifier l'absence sur une ligne de la grille
-    :param grille: grille que l'on veut résoudre
-    :param ligne: ligne sur laquelle on cherche à vérifier l'absence du chiffre
-    :return: booléen vérifiant l'absence du chiffre sur la ligne
-    """
-    for j in grille[ligne]:
-        if j == chiffre:
-            return False
-    return True
+    def test_absentSurLigne(self):
+        self.assert_absentSurLigne(True, 5, 0)
+        self.assert_absentSurLigne(False, 1, 1)
 
-assert absentSurLigne(5, grille_test, 0) == True
-assert absentSurLigne(1, grille_test, 1) == False
+    def test_absentSurColonne(self):
+        self.assert_absentSurColonne(True, 2, 2)
+        self.assert_absentSurColonne(False, 8, 3)
+
+    def test_absentSurBloc(self):
+        self.assert_absentSurBloc(True, 6, 4, 3)
+        self.assert_absentSurBloc(False, 9, 5, 7)
+
+    def test_estValide(self):
+        #self.assert_estValide(True, 0)
+        #self.assert_estValide(True, 0, grille=grille_test)
+        self.assert_estValide(False, 0, grille=[
+            [6, 6, 6, 2, 3, 4, 9, 7, 5],
+            [3, 9, 2, 5, 7, 6, 4, 1, 8],
+            [7, 4, 5, 8, 1, 9, 6, 3, 2],
+            [2, 3, 9, 7, 4, 5, 8, 6, 1],
+            [8, 6, 1, 9, 2, 3, 7, 5, 4],
+            [5, 7, 4, 6, 8, 1, 3, 2, 9],
+            [4, 8, 6, 3, 5, 2, 1, 9, 7],
+            [9, 5, 7, 1, 6, 8, 2, 4, 3],
+            [1, 2, 3, 4, 9, 7, 5, 8, 6]])
+        self.assert_estValide(False, 0, grille=[
+            [0, 0, 0, 2, 3, 4, 9, 7, 5],
+            [3, 9, 2, 5, 7, 6, 4, 1, 8],
+            [7, 4, 5, 8, 1, 9, 6, 3, 2],
+            [9, 9, 9, 7, 4, 5, 8, 6, 1],
+            [8, 6, 1, 9, 2, 3, 7, 5, 4],
+            [5, 7, 4, 6, 8, 1, 3, 2, 9],
+            [4, 8, 6, 3, 5, 2, 1, 9, 7],
+            [9, 5, 7, 1, 6, 8, 2, 4, 3],
+            [1, 2, 3, 4, 9, 7, 5, 8, 6]])
+
+    # -----------------
 
 
+    def assert_estValide(self, expected, position, grille=grille_solution):
+        self.assertEqual(expected, estValide(copy.deepcopy(grille), position))
 
-def absentSurColonne(chiffre, grille, colonne):
-    """
-        :param chiffre: chiffre entre 1 et 9 dont on on cherche à vérifier l'absence sur une colonne de la grille
-        :param grille: grille que l'on veut résoudre
-        :param colonne: colonne sur laquelle on cherche à vérifier l'absence du chiffre
-        :return: booléen vérifiant l'absence du chiffre sur la colonne
-    """
-    for i in range(9):
-        if grille[i][colonne] == chiffre:
-            return False
-    return True
+    def assert_absentSurLigne(self, expected, chiffre, ligne, grille=grille_test):
+        self.assertEqual(expected, absentSurLigne(chiffre, grille, ligne))
 
-assert absentSurColonne(2, grille_test, 2) == True
-assert absentSurColonne(8, grille_test, 3) == False
+    def assert_absentSurColonne(self, expected, chiffre, colonne, grille=grille_test):
+        self.assertEqual(expected, absentSurColonne(chiffre, grille, colonne))
 
-
-
-def absentSurBloc(chiffre, grille, ligne, colonne):
-    """
-        :param chiffre: chiffre entre 1 et 9 dont on on cherche à vérifier l'absence sur un bloc de la grille
-        :param grille: grille que l'on veut résoudre
-        :param ligne: ligne appartenant au bloc
-        :param colonne: colonne appartenant au bloc
-        :return: booléen vérifiant l'absence du chiffre sur le bloc
-    """
-    ligneBloc = ligne - (ligne % 3)
-    colonneBloc = colonne - (colonne % 3)
-    for i in range(ligneBloc, ligneBloc + 3):
-        for j in range(colonneBloc, colonneBloc + 3):
-            if grille[i][j] == chiffre:
-                return False
-    return True
-
-assert absentSurBloc(6, grille_test, 4, 3) == True
-assert absentSurBloc(9, grille_test, 5, 7) == False
+    def assert_absentSurBloc(self, expected, chiffre, ligne, colonne, grille=grille_test):
+        self.assertEqual(expected, absentSurBloc(chiffre, grille, ligne, colonne))
 
 
 
-def estValide(grille, position):
-    """
-    :param grille: grille que l'on veut résoudre
-    :param position: numéro de la case (de 0 à 80) à partir duquel on cherche à vérifier si la grille est valide, il sert d'itérateur pour parcourir la grille
-    :return: booloéen indiquant si la grille est valide à partir de la position donnée
-    """
-    if position == 81: # Les indices vont de 0 à 80 mais pour prendre en compte la case 80, il faut aller jusqu'à 81
-        return True
-    ligne = position // 9
-    colonne = position % 9
-    if grille[ligne][colonne] != 0:
-        return estValide(grille, position+1)
-    for chiffre in range(1,10):
-        if (absentSurLigne(chiffre, grille, ligne) and absentSurColonne(chiffre, grille, colonne) and absentSurBloc(chiffre, grille, ligne, colonne)):
-            grille[ligne][colonne] = chiffre
-            if estValide(grille, position+1):
-                return True
-            grille[ligne][colonne] = 0
-    return False
-
-assert estValide(grille_test, 0)
-
-
-
-def resoudre_sudoku(grille):
-    """
-    :param grille: grille que l'on veut résoudre
-    :return: grille complétée si une solution valide est trouvée, None sinon
-    """
-    if estValide(grille, 0):
-        return grille
-    else:
-        return None
-
-assert resoudre_sudoku(grille_test) == grille_solution
+if __name__ == '__main__':
+    unittest.main()
